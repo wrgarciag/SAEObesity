@@ -1,9 +1,15 @@
 
+# En este archivo se calculan medias poblacionales a nivel de municipio
+# Estas seran las variables auxiliares para las estimaciones a nivel de municipios
+
+# Se realiza programacion en paralelo para operar sobre los archivos
+# del censo que vienen en 33 carpetas
+
 no_cores <- detectCores() - 1  
 registerDoParallel(cores=no_cores)  
 cl <- makeCluster(no_cores, type="PSOCK")
 
-### Datos Censo 2018
+# Funcion para procesar los datos del censo
 prepareCensus <- function(i,path.in,path.out){
 
   require(data.table) 
@@ -11,9 +17,8 @@ prepareCensus <- function(i,path.in,path.out){
   require(dummies)
   require(readstata13)
   
-  data <- as.data.table(read.spss(paste0(path.in,'CNPV2018_5PER_A2_',i,'.sav'), use.value.labels = F, to.data.frame = T))
-  #data <- as.data.table(read.dta13(paste0(path.in,'CNPV2018_5PER_A2_',i,'.dta')))
-  
+  data <- as.data.table(read.spss(paste0(path.in,'CNPV2018_5PER_A2_',i,'.sav'),
+                                  use.value.labels = F, to.data.frame = T))
   # Dummy mujeres
   data[,mujer:=as.numeric(P_SEXO==2)]
   
@@ -26,7 +31,8 @@ prepareCensus <- function(i,path.in,path.out){
   data[,gedad:=`levels<-`(P_EDADR, gedad5)]
   
   # Borrar menores de 15 y mayores de 64
-  data <- data[!(as.character(gedad) %in% c('0','5','10','65','70','75','80','85','90','95','100')),]
+  data <- data[!(as.character(gedad) %in% c('0','5','10','65','70','75','80',
+                                            '85','90','95','100')),]
   
   # dummy rural
   data[,rural:=as.numeric(as.numeric(UA_CLASE)!=1)]
@@ -62,12 +68,12 @@ prepareCensus <- function(i,path.in,path.out){
   #return(data)
 }
 
-#p.deptos <- c(97,99)
-
+# Codigos de los departamento
 p.deptos <- c('05','08',11,13,15,17,18,19,20,23,25,27,41,
               44,47,50,52,54,63,66,68,70,73,76,81,85,86,
               88,91,94,95,97,99)
 
+# Corre la funcion de procesamiento del censo en paralelo
 path.in  <- paste0(wd_data,'Censo/')
 path.out <- wd_data
 
@@ -78,7 +84,7 @@ stopCluster(cl)
 
 # Consolida tabla auxiliar
 
-# Datos auxiliares del censo
+# Datos auxiliares del censo----
 
 dt_censo <- c()
 for(ii in 1:length(p.deptos)){

@@ -9,8 +9,7 @@ RMSE <- function(m, o){
   sqrt(mean((m - o)^2))
 }
 
-
-## Estimador directo----
+#Estimacion directa----
 data <- as.data.table(readRDS(file = paste0(wd_data,'MicroEnsin.rds')))
 
 # Crea las variables de edad en la base de datos
@@ -24,7 +23,7 @@ data[,gedad_4554:=gedad_45+gedad_50]
 data[,gedad_5564:=gedad_55+gedad_60]
 
 
-# Disenio de la encuesta----
+# Disenio de la encuesta-
 design <- 
   svydesign( 
     id= ~ cod_UPM_rev, 
@@ -46,9 +45,9 @@ povinc.dir[,id:=str_pad(U_DPTO, 2, pad = "0")]
 
 g <- colmap(departamentos, povinc.dir, var = "obeso")
 g
-ggsave(file = paste0(wd_data,"MapaDepto",".jpg"), plot = g, device = "jpg",height = 20, width = 15)
+ggsave(file = paste0(wd_resu,"MapaDepto",".jpg"), plot = g, device = "jpg",height = 20, width = 15)
 
-
+# Estimacion de modelos----
 ## Modelo Fay-herriot----
 
 dt_ensin_aux <- fread(file = paste0(wd_data,'AuxEnsin.csv'))
@@ -127,7 +126,7 @@ rmse.out  <- data.frame(cbind(rmse.FH,rmse.syn1,rmse.syn2))
 rmse.out
 
 ### 
-# Model prediction -----
+# Prediccion con modelos-----
 ###
 
 dt_censo <- fread(file=paste0(wd_data,'AuxCenso.csv'))
@@ -158,7 +157,7 @@ dt_censo[,id:=str_pad(U_MPIO, 5, pad = "0")]
 g <- colmap(municipios, dt_censo, var = "indicador")
 g
 
-ggsave(file = paste0(wd_data,"MapaMpioFH",".jpg"), plot = g, device = "jpg",height = 20, width = 15)
+ggsave(file = paste0(wd_resu,"MapaMpioFH",".jpg"), plot = g, device = "jpg",height = 20, width = 15)
 
 ## Create new workbooks
 wb <- createWorkbook() 
@@ -173,7 +172,7 @@ writeData(wb, "EstDepto", povinc.dir)
 writeData(wb, "EstMpio", dt_censo)
 
 ## Save workbook to working directory 
-saveWorkbook(wb, file = paste0(wd_data,"SalidasSAEEnsinFH",".xlsx"), overwrite = TRUE)
+saveWorkbook(wb, file = paste0(wd_resu,"SalidasSAEEnsinFH",".xlsx"), overwrite = TRUE)
 
 
 ## Modelo Con errores anidados----
@@ -197,7 +196,7 @@ povinc.rsyn2[,povinc.rsyn2:=V1+upred]
 g <- colmap(municipios, povinc.rsyn2, var = "povinc.rsyn2")
 g
 
-ggsave(file = paste0(wd_data,"MapaMpioEBLUP",".jpg"), plot = g, device = "jpg",height = 20, width = 15)
+ggsave(file = paste0(wd_resu,"MapaMpioEBLUP",".jpg"), plot = g, device = "jpg",height = 20, width = 15)
 
 
 ## Create new workbooks
@@ -213,6 +212,6 @@ writeData(wb, "EstDepto", povinc.dir)
 writeData(wb, "EstMpio", povinc.rsyn2)
 
 ## Save workbook to working directory 
-saveWorkbook(wb, file = paste0(wd_data,"SalidasSAEEnsinEBLUP",".xlsx"), overwrite = TRUE)
+saveWorkbook(wb, file = paste0(wd_resu,"SalidasSAEEnsinEBLUP",".xlsx"), overwrite = TRUE)
 
 
